@@ -11,7 +11,6 @@ import clip
 import json
 
 parser = ArgumentParser()
-parser.add_argument("clip_model_name")
 parser.add_argument("directory")
 parser.add_argument("--clip_model_name", type=str, default="ViT-B/16")
 parser.add_argument("-t", "--top-n", type=int, default=50)
@@ -77,11 +76,11 @@ for path in tqdm(filepaths):
 
 if args.to_json:
     data = []
-    with open("scores.txt", "w") as file:
+    with open("scores.json", "w") as file:
         for score, path in scores:
             data.append({"score":score, "path":path})
             print(f"{score}: {path}")
-        json.dump(data)
+        json.dump(data, file)
 else:
     for score, path in scores:
         print(f"{score}: {path}")
