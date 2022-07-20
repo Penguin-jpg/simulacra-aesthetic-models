@@ -8,12 +8,14 @@ from torchvision.transforms import functional as TF
 import torch
 from simulacra_fit_linear_model import AestheticMeanPredictionLinearModel
 import clip
+import json
 
 parser = ArgumentParser()
 parser.add_argument("clip_model_name")
 parser.add_argument("directory")
-parser.add_argument("-t", "--top-n", default=50)
-parser.add_argument("--to_txt", action="store_true")
+parser.add_argument("--clip_model_name", type=str, default="ViT-B/16")
+parser.add_argument("-t", "--top-n", type=int, default=50)
+parser.add_argument("--to_json", action="store_true")
 args = parser.parse_args()
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -33,7 +35,9 @@ normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[
 
 # 512 is embed dimension for ViT-B/16 CLIP
 model = AestheticMeanPredictionLinearModel(model_name_to_dim[args.clip_model_name])
-model.load_state_dict(torch.load(model_name_to_model_path[args.clip_model_name]))
+model.load_state_dict(
+    torch.load(model_name_to_model_path[args.clip_model_name])
+)
 model = model.to(device)
 
 
@@ -71,11 +75,13 @@ for path in tqdm(filepaths):
             scores.sort(key=lambda x: x[0])
             scores = scores[1:]
 
-if args.to_txt:
+if args.to_json:
+    data = []
     with open("scores.txt", "w") as file:
         for score, path in scores:
-            file.write(f"{score}:{path}\n")
+            data.append({"score":score, "path":path})
             print(f"{score}: {path}")
+        json.dump(data)
 else:
     for score, path in scores:
         print(f"{score}: {path}")
