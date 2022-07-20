@@ -13,6 +13,7 @@ parser = ArgumentParser()
 parser.add_argument("clip_model_name")
 parser.add_argument("directory")
 parser.add_argument("-t", "--top-n", default=50)
+parser.add_argument("--to_txt", action="store_true")
 args = parser.parse_args()
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -70,7 +71,11 @@ for path in tqdm(filepaths):
             scores.sort(key=lambda x: x[0])
             scores = scores[1:]
 
-with open("scores.txt", "w") as file:
+if args.to_txt:
+    with open("scores.txt", "w") as file:
+        for score, path in scores:
+            file.write(f"{score}:{path}\n")
+            print(f"{score}: {path}")
+else:
     for score, path in scores:
-        file.write(f"{score}:{path}\n")
         print(f"{score}: {path}")
